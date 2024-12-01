@@ -1,0 +1,129 @@
+---
+title: "Ejemplo 2: tabla con inscripciones de nombres"
+author: "Riva Quiroga"
+format: html
+jupyter: python3
+html-table-processing: none
+lang: es
+embed-resources: true
+language: 
+    title-block-author-single: "Desarrollado por"
+---
+
+Este fue el código utilizado para la versión final del segundo ejemplo mostrado durante la charla. 
+
+## Procesamiento de los datos
+
+```{python}
+import polars as pl
+import pandas as pd
+from great_tables import GT, md, style, loc, google_font, nanoplot_options
+
+registros = pl.read_csv("https://raw.githubusercontent.com/rivaquiroga/guaguas/refs/heads/main/data-raw/1920-2021.csv")
+```
+
+
+```{python}
+
+top_3 = (
+    registros
+    .filter(pl.col("anio") == 2021, pl.col("sexo").is_in(["F", "M"]))
+    .select(pl.col("nombre", "sexo", "n"))
+    .sort(['sexo', 'n'], descending=[False, True])
+    .filter(pl.int_range(0, pl.len()).over('sexo') < 3)
+)
+```
+
+```{python}
+
+nombres = top_3.get_column("nombre")
+
+# Datos para generar el nanoplot
+serie = (
+    registros
+    .filter(pl.col("anio") > 1991, pl.col("sexo").is_in(["F", "M"]), pl.col("nombre").is_in(nombres))
+    .group_by(["nombre", "sexo"])
+    .agg(pl.col("n").cast(str).alias("serie"))  
+    .with_columns(
+        pl.col("serie").list.join(" ").alias("serie") 
+    )
+)
+
+top_3_2021 = (
+    # join para agregar la serie de valores de los últimos 30 años
+    top_3
+    .join(serie, on=["nombre", "sexo"], how="left")
+    .sort("n", descending=True)
+    # renombrar los nombres de la variable 'sexo' para que sean más comunicativos en los stubs
+    .with_columns(
+    pl.when(pl.col("sexo") == "F").then(pl.lit(" femeninos"))
+     .when(pl.col("sexo") == "M").then(pl.lit("masculinos"))
+     .otherwise(pl.col("sexo"))  # Por si hay valores inesperados
+     .alias("sexo")
+)
+)
+```
+
+
+
+# Creación de la tabla
+
+
+```{python}
+(
+    GT(top_3_2021)
+    .tab_header(
+        title = md("**Nombres con más inscripciones en Chile durante 2021**"),
+        subtitle = md("Top 3 según sexo registral (femenino y masculino)")
+    )
+    .opt_align_table_header(align="left")
+    .tab_style(
+        style.fill("whitesmoke"),
+        loc.header()
+    )
+    .tab_stub(rowname_col="nombre", groupname_col="sexo")
+    .tab_options(
+        row_group_background_color="#cdcdfb", 
+        heading_title_font_size="24px",
+        table_body_hlines_style="none", 
+        table_body_vlines_style="#cdcdfb",
+        row_group_border_top_color="#cdcdfb",
+        row_group_border_bottom_color="#cdcdfb")
+    .cols_label(
+        n = md("**frecuencia en 2021**"),
+        serie = md("**tendencia últimos 20 años**")
+        )
+    .cols_align(
+        align="center", 
+        columns=["n", "serie"]
+        )
+    .tab_source_note("Fuente: Registro Civil")
+    .tab_source_note("Nota: No se incluyen los datos de sexo registral indefinido porque en general no hay más de una persona registrada con el mismo nombre por año")
+    .tab_style(
+        style.fill("whitesmoke"),
+        loc.footer()
+        )
+    .fmt_integer(
+        columns="n", 
+        sep_mark=' '
+        )
+    .fmt_nanoplot(
+        columns="serie",
+        options=nanoplot_options(
+            data_area_fill_color="#6666cc",
+            data_point_radius=0,
+            data_point_stroke_width=4,
+            data_point_fill_color="#6666cc",
+            data_line_type="straight",
+            data_line_stroke_color="#6666cc",
+            data_line_stroke_width=12,
+        ))
+    .opt_table_font(
+        font = google_font(name="Fredoka")
+        )
+)
+```
+
+
+
+

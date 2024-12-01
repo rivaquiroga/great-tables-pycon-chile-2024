@@ -1,0 +1,79 @@
+---
+title: "Ejemplo 1: tabla con datos de participación en elecciones"
+author: "Riva Quiroga"
+format: html
+jupyter: python3
+html-table-processing: none
+lang: es
+embed-resources: true
+language: 
+    title-block-author-single: "Desarrollado por"
+---
+
+Este fue el código utilizado para la versión final del primer ejemplo mostrado durante la charla. Además de polars, cargamos los selectores incluidos en esa biblioteca.
+
+```{python}
+import polars as pl
+import polars.selectors as cs
+from great_tables import GT, md, style, loc, google_font
+
+participacion = pl.read_csv("elecciones-gore.csv", separator=";", decimal_comma=True)
+```
+
+
+
+
+```{python}
+(
+    GT(participacion)
+    .cols_hide(columns=["mesas", "electores"])
+    .tab_header(
+        title = md("**Participación en las elecciones de gobernadores regionales 2024**"),
+        subtitle = md("**en regiones en que hubo segunda vuelta**")
+    )
+    .opt_align_table_header(align="left")
+    .tab_style(
+        style.fill("whitesmoke"),
+        loc.header()
+    )
+    .tab_source_note("Fuente: Servel")
+    .tab_style(
+        style.fill("whitesmoke"),
+        loc.footer()
+    )
+    .tab_spanner(
+        label=md("primera vuelta"),
+        columns=cs.ends_with("1")
+    )
+    .tab_spanner(
+        label=md("segunda vuelta"),
+        columns=cs.ends_with("2")
+    )
+    .cols_label(
+        region = "región",
+        vot_v1="votantes",
+        vot_v2="votantes",
+        porcent_v1="porcentaje",
+        porcent_v2="porcentaje"
+    )
+    .fmt_percent(
+        columns=cs.starts_with("porcent"), 
+        decimals=1, 
+        dec_mark=",")
+    .fmt_integer(
+        columns=cs.starts_with("vot"), 
+        sep_mark=' '
+        )
+    .data_color(
+        columns=cs.starts_with("porcent"),
+        palette=["lightcoral", "white", "skyblue"],
+        domain=[0.7, 1],
+        na_color="white"
+    )
+    .opt_table_font(
+        font=google_font(name="Jost")
+        )
+    
+)
+```
+
