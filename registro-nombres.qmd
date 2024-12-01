@@ -76,29 +76,33 @@ top_3_2021 = (
         title = md("**Nombres con más inscripciones en Chile durante 2021**"),
         subtitle = md("Top 3 según sexo registral (femenino y masculino)")
     )
-    .opt_align_table_header(align="left")
+    .opt_align_table_header(
+        align="left"
+        )
     .tab_style(
         style.fill("whitesmoke"),
         loc.header()
     )
-    .tab_stub(rowname_col="nombre", groupname_col="sexo")
+    .tab_stub(
+        rowname_col="nombre", 
+        groupname_col="sexo"
+        )
     .tab_options(
         row_group_background_color="#cdcdfb", 
-        heading_title_font_size="24px",
         table_body_hlines_style="none", 
         table_body_vlines_style="#cdcdfb",
         row_group_border_top_color="#cdcdfb",
         row_group_border_bottom_color="#cdcdfb")
     .cols_label(
         n = md("**frecuencia en 2021**"),
-        serie = md("**tendencia últimos 20 años**")
+        serie = md("**tendencia últimos 30 años**")
         )
     .cols_align(
         align="center", 
         columns=["n", "serie"]
         )
     .tab_source_note("Fuente: Registro Civil")
-    .tab_source_note("Nota: No se incluyen los datos de sexo registral indefinido porque en general no hay más de una persona registrada con el mismo nombre por año")
+    .tab_source_note(md("Nota: No se incluyen los datos de sexo registral indefinido porque en general <br/>no hay más de una persona registrada con el mismo nombre por año"))
     .tab_style(
         style.fill("whitesmoke"),
         loc.footer()
@@ -116,8 +120,9 @@ top_3_2021 = (
             data_point_fill_color="#6666cc",
             data_line_type="straight",
             data_line_stroke_color="#6666cc",
-            data_line_stroke_width=12,
-        ))
+            data_line_stroke_width=12
+        )
+        )
     .opt_table_font(
         font = google_font(name="Fredoka")
         )

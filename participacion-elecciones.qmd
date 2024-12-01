@@ -10,7 +10,7 @@ language:
     title-block-author-single: "Desarrollado por"
 ---
 
-Este fue el código utilizado para la versión final del primer ejemplo mostrado durante la charla. Además de polars, cargamos los selectores incluidos en esa biblioteca.
+Este fue el código utilizado para la versión final del primer ejemplo mostrado durante la charla. 
 
 ```{python}
 import polars as pl
@@ -26,12 +26,16 @@ participacion = pl.read_csv("elecciones-gore.csv", separator=";", decimal_comma=
 ```{python}
 (
     GT(participacion)
-    .cols_hide(columns=["mesas", "electores"])
+    .cols_hide(
+        columns=["mesas", "electores"]
+        )
     .tab_header(
         title = md("**Participación en las elecciones de gobernadores regionales 2024**"),
         subtitle = md("**en regiones en que hubo segunda vuelta**")
     )
-    .opt_align_table_header(align="left")
+    .opt_align_table_header(
+        align="left"
+        )
     .tab_style(
         style.fill("whitesmoke"),
         loc.header()
@@ -73,7 +77,6 @@ participacion = pl.read_csv("elecciones-gore.csv", separator=";", decimal_comma=
     .opt_table_font(
         font=google_font(name="Jost")
         )
-    
 )
 ```
 
